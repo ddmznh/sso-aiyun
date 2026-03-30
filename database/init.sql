@@ -204,3 +204,34 @@ LEFT JOIN sso_logs l ON c.client_id = l.client_id
 GROUP BY c.client_id, c.client_name, c.status;
 
 COMMIT;
+
+-- ===========================
+-- 短信验证码表（新增）
+-- ===========================
+DROP TABLE IF EXISTS `sms_codes`;
+CREATE TABLE `sms_codes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `mobile` varchar(20) NOT NULL COMMENT '手机号码',
+  `code` varchar(10) NOT NULL COMMENT '验证码',
+  `ip` varchar(50) DEFAULT NULL COMMENT '请求 IP',
+  `used` tinyint(1) DEFAULT 0 COMMENT '是否已使用',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `expire_at` datetime NOT NULL COMMENT '过期时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_mobile` (`mobile`),
+  KEY `idx_expire` (`expire_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='短信验证码表';
+
+-- ===========================
+-- IP 黑名单表（防短信炸弹）
+-- ===========================
+DROP TABLE IF EXISTS `ip_blacklist`;
+CREATE TABLE `ip_blacklist` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip` varchar(50) NOT NULL COMMENT 'IP 地址',
+  `reason` varchar(255) DEFAULT NULL COMMENT '封禁原因',
+  `expires_at` datetime DEFAULT NULL COMMENT '解封时间',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_ip` (`ip`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='IP 黑名单表';
